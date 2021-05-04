@@ -105,8 +105,8 @@ export class SettingsPanel {
                 // Restrict the webview to only loading content from these directories
                 localResourceRoots: [
                     vscode.Uri.file(util.extensionPath),
-                    vscode.Uri.file(path.join(util.extensionPath, 'ui')),
-                    vscode.Uri.file(path.join(util.extensionPath, 'out', 'ui'))]
+                    vscode.Uri.file(path.join(util.extensionPath, 'ui', 'settings')),
+                    vscode.Uri.file(path.join(util.extensionPath, 'out', 'ui', 'settings'))]
             }
         );
 
@@ -355,14 +355,14 @@ export class SettingsPanel {
     private getHtml(): string {
         let content: string | undefined;
 
-        content = fs.readFileSync(util.getLocalizedHtmlPath("ui/settings.html")).toString();
+        content = fs.readFileSync(util.getLocalizedHtmlPath("ui/settings/settings.html")).toString();
 
         if (this.panel && this.panel.webview) {
             const cppImageUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'LanguageCCPP_color_128x.png')));
             content = content.replace(
                 /{{cpp_image_uri}}/g,
                 cppImageUri.toString());
-            const settingsJsUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'out/ui/settings.js')));
+            const settingsJsUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'out/ui/settings/settings.js')));
             content = content.replace(
                 /{{settings_js_uri}}/g,
                 settingsJsUri.toString());

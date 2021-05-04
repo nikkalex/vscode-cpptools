@@ -2,7 +2,6 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-// import * as crypto from 'crypto';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { CppdbgTrackerAdapterDescriptionFactor } from './debugAdapterDescriptorFactory';
@@ -51,10 +50,10 @@ export class DisassemblyPage {
     }
 
     private static getHtml(): string {
-        let content = fs.readFileSync(util.getLocalizedHtmlPath("ui/disassembly.html")).toString();
+        let content = fs.readFileSync(util.getLocalizedHtmlPath("ui/disassembly/disassembly.html")).toString();
 
         if (this._panel && this._panel.webview) {
-            const settingsJsUri: vscode.Uri = this._panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'out/ui/disassembly.js')));
+            const settingsJsUri: vscode.Uri = this._panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'dist/disassembly.js')));
             content = content.replace(/{{disassembly_js_uri}}/g, settingsJsUri.toString());
         }
 

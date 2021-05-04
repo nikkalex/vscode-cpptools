@@ -11,7 +11,7 @@ import * as vscode from 'vscode';
 import * as url from 'url';
 import * as tmp from 'tmp';
 import * as yauzl from 'yauzl';
-import * as mkdirp from 'mkdirp';
+import mkdirp from 'mkdirp';
 
 import * as util from './common';
 import { PlatformInformation } from './platform';

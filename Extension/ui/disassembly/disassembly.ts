@@ -33,12 +33,17 @@ class DisassemblyApp {
                         } else {
                             div.innerText = `${instruction.address}\t${instruction.instruction}`;
                         }
-                    }); 
+                        document.body.appendChild(div);
+                    });
                     break;
                 }
             }
         });
+
+        const testButton = document.getElementById('test');
+        testButton?.addEventListener('click', () => { this.vsCodeApi.postMessage({ command: 'loadAssembly' }); })
     }
 }
 
+// @ts-ignore: TS6133: 'disassemblyApp' is declared but its value is never read.
 const disassemblyApp: DisassemblyApp = new DisassemblyApp();

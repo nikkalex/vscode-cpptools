@@ -15,8 +15,8 @@ src/**
 out/src/**
 out/tools/**
 
-# ignore ts files in ui
-ui/*.ts
+# ignore webview files
+ui/**
 
 # ignore Azure-Pipelines files
 jobs/**
