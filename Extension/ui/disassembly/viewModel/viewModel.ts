@@ -7,15 +7,13 @@
 
 import { IScrollPosition, Scrollable } from '../scrollable';
 import * as strings from '../strings';
-import { IViewLineTokens } from '../core/lineTokens';
 import { IPosition, Position } from '../core/position';
 import { IRange, Range } from '../core/range';
 import { INewScrollPosition, ScrollType } from '../editorCommon';
-import { EndOfLinePreference, IActiveIndentGuideInfo, IModelDecorationOptions, TextModelResolvedOptions, ITextModel } from 'vs/editor/common/model';
+import { IModelDecorationOptions, TextModelResolvedOptions, ITextModel } from '../model';
 import { VerticalRevealType } from '../view/viewEvents';
 import { IPartialViewLinesViewportData } from '../viewLayout/viewLinesViewportData';
 import { IEditorWhitespace, IWhitespaceChangeAccessor } from '../viewLayout/linesLayout';
-import { EditorTheme } from '../view/viewContext';
 import { ICursorSimpleModel, PartialCursorState, CursorState, IColumnSelectData, EditOperationType, CursorConfiguration } from '../controller/cursorCommon';
 import { CursorChangeReason } from '../controller/cursorEvents';
 import { ViewEventHandler } from './viewEventHandler';
@@ -164,16 +162,13 @@ export interface IViewModel extends ICursorSimpleModel {
 	 * Gives a hint that a lot of requests are about to come in for these line numbers.
 	 */
 	setViewport(startLineNumber: number, endLineNumber: number, centeredLineNumber: number): void;
-	tokenizeViewport(): void;
 	setHasFocus(hasFocus: boolean): void;
 	onCompositionStart(): void;
 	onCompositionEnd(): void;
-	onDidColorThemeChange(): void;
 
 	getDecorationsInViewport(visibleRange: Range): ViewModelDecoration[];
 	getViewLineRenderingData(visibleRange: Range, lineNumber: number): ViewLineRenderingData;
 	getViewLineData(lineNumber: number): ViewLineData;
-	getMinimapLinesRenderingData(startLineNumber: number, endLineNumber: number, needed: boolean[]): MinimapLinesRenderingData;
 	getCompletelyVisibleViewRange(): Range;
 	getCompletelyVisibleViewRangeAtScrollTop(scrollTop: number): Range;
 
@@ -181,31 +176,18 @@ export interface IViewModel extends ICursorSimpleModel {
 	getLineCount(): number;
 	getLineContent(lineNumber: number): string;
 	getLineLength(lineNumber: number): number;
-	getActiveIndentGuide(lineNumber: number, minLineNumber: number, maxLineNumber: number): IActiveIndentGuideInfo;
-	getLinesIndentGuides(startLineNumber: number, endLineNumber: number): number[];
 	getLineMinColumn(lineNumber: number): number;
 	getLineMaxColumn(lineNumber: number): number;
 	getLineFirstNonWhitespaceColumn(lineNumber: number): number;
 	getLineLastNonWhitespaceColumn(lineNumber: number): number;
-	getAllOverviewRulerDecorations(theme: EditorTheme): IOverviewRulerDecorations;
-	invalidateOverviewRulerColorCache(): void;
-	invalidateMinimapColorCache(): void;
-	getValueInRange(range: Range, eol: EndOfLinePreference): string;
+	getValueInRange(range: Range): string;
 
 	getModelLineMaxColumn(modelLineNumber: number): number;
 	validateModelPosition(modelPosition: IPosition): Position;
 	validateModelRange(range: IRange): Range;
 
-	deduceModelPositionRelativeToViewPosition(viewAnchorPosition: Position, deltaOffset: number, lineFeedCnt: number): Position;
-	getEOL(): string;
+	deduceModelPositionRelativeToViewPosition(viewAnchorPosition: Position, deltaOffset: number): Position;
 	getPlainTextToCopy(modelRanges: Range[], emptySelectionClipboard: boolean, forceCRLF: boolean): string | string[];
-	getRichTextToCopy(modelRanges: Range[], emptySelectionClipboard: boolean): { html: string, mode: string } | null;
-
-	//#region model
-
-	pushStackElement(): void;
-
-	//#endregion
 
 	createLineBreaksComputer(): ILineBreaksComputer;
 
@@ -215,7 +197,6 @@ export interface IViewModel extends ICursorSimpleModel {
 	getCursorStates(): CursorState[];
 	setCursorStates(source: string | null | undefined, reason: CursorChangeReason, states: PartialCursorState[] | null): void;
 	getCursorColumnSelectData(): IColumnSelectData;
-	getCursorAutoClosedCharacters(): Range[];
 	setCursorColumnSelectData(columnSelectData: IColumnSelectData): void;
 	getPrevEditOperationType(): EditOperationType;
 	setPrevEditOperationType(type: EditOperationType): void;
@@ -272,25 +253,19 @@ export class ViewLineData {
 	 * The visible column at the start of the line (after the fauxIndent).
 	 */
 	public readonly startVisibleColumn: number;
-	/**
-	 * The tokens at this view line.
-	 */
-	public readonly tokens: IViewLineTokens;
 
 	constructor(
 		content: string,
 		continuesWithWrappedLine: boolean,
 		minColumn: number,
 		maxColumn: number,
-		startVisibleColumn: number,
-		tokens: IViewLineTokens
+		startVisibleColumn: number
 	) {
 		this.content = content;
 		this.continuesWithWrappedLine = continuesWithWrappedLine;
 		this.minColumn = minColumn;
 		this.maxColumn = maxColumn;
 		this.startVisibleColumn = startVisibleColumn;
-		this.tokens = tokens;
 	}
 }
 
@@ -320,10 +295,6 @@ export class ViewLineRenderingData {
 	 */
 	public readonly isBasicASCII: boolean;
 	/**
-	 * The tokens at this view line.
-	 */
-	public readonly tokens: IViewLineTokens;
-	/**
 	 * Inline decorations at this view line.
 	 */
 	public readonly inlineDecorations: InlineDecoration[];
@@ -343,7 +314,6 @@ export class ViewLineRenderingData {
 		continuesWithWrappedLine: boolean,
 		mightContainRTL: boolean,
 		mightContainNonBasicASCII: boolean,
-		tokens: IViewLineTokens,
 		inlineDecorations: InlineDecoration[],
 		tabSize: number,
 		startVisibleColumn: number
@@ -356,7 +326,6 @@ export class ViewLineRenderingData {
 		this.isBasicASCII = ViewLineRenderingData.isBasicASCII(content, mightContainNonBasicASCII);
 		this.containsRTL = ViewLineRenderingData.containsRTL(content, this.isBasicASCII, mightContainRTL);
 
-		this.tokens = tokens;
 		this.inlineDecorations = inlineDecorations;
 		this.tabSize = tabSize;
 		this.startVisibleColumn = startVisibleColumn;

@@ -5,11 +5,11 @@
 
 // Original file: vscode/src/vs/base/common/event.ts
 
-import { onUnexpectedError } from 'vs/base/common/errors';
+import { onUnexpectedError } from './errors';
 import { once as onceFn } from './functional';
 import { Disposable, IDisposable, toDisposable, combinedDisposable, DisposableStore } from './lifecycle';
 import { LinkedList } from './linkedList';
-import { StopWatch } from 'vs/base/common/stopwatch';
+import { StopWatch } from './stopwatch';
 
 /**
  * To an event a function with one or zero parameters

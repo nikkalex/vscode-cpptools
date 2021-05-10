@@ -5,30 +5,14 @@
 
 // Original file: vscode/src/vs/editor/common/editorCommon.ts
 
-import { IMarkdownString } from 'vs/base/common/htmlContent';
 import { IDisposable } from './lifecycle';
 import { Event } from './event';
-import { URI, UriComponents } from 'vs/base/common/uri';
+import { UriComponents } from './uri';
 import { ConfigurationChangedEvent, IComputedEditorOptions, IEditorOptions } from 'vs/editor/common/config/editorOptions';
 import { IPosition, Position } from './core/position';
 import { IRange, Range } from './core/range';
 import { ISelection, Selection } from './core/selection';
-import { IModelDecorationsChangeAccessor, ITextModel, OverviewRulerLane, TrackedRangeStickiness } from 'vs/editor/common/model';
-import { ThemeColor } from 'vs/platform/theme/common/themeService';
-
-/**
- * A model for the diff editor.
- */
-export interface IDiffEditorModel {
-	/**
-	 * Original model.
-	 */
-	original: ITextModel;
-	/**
-	 * Modified model.
-	 */
-	modified: ITextModel;
-}
+import { IModelDecorationsChangeAccessor, ITextModel, TrackedRangeStickiness } from './model';
 
 export interface IDimension {
 	width: number;
@@ -43,23 +27,6 @@ export interface IChange {
 	readonly originalEndLineNumber: number;
 	readonly modifiedStartLineNumber: number;
 	readonly modifiedEndLineNumber: number;
-}
-
-/**
- * A character level change.
- */
-export interface ICharChange extends IChange {
-	readonly originalStartColumn: number;
-	readonly originalEndColumn: number;
-	readonly modifiedStartColumn: number;
-	readonly modifiedEndColumn: number;
-}
-
-/**
- * A line change
- */
-export interface ILineChange extends IChange {
-	readonly charChanges: ICharChange[] | undefined;
 }
 
 /**
@@ -115,7 +82,7 @@ export interface IEditorAction {
 	run(): Promise<void>;
 }
 
-export type IEditorModel = ITextModel | IDiffEditorModel;
+export type IEditorModel = ITextModel;
 
 /**
  * A (serializable) state of the cursors.
@@ -426,29 +393,6 @@ export interface IEditor {
 }
 
 /**
- * A diff editor.
- *
- * @internal
- */
-export interface IDiffEditor extends IEditor {
-
-	/**
-	 * Type the getModel() of IEditor.
-	 */
-	getModel(): IDiffEditorModel | null;
-
-	/**
-	 * Get the `original` editor.
-	 */
-	getOriginalEditor(): IEditor;
-
-	/**
-	 * Get the `modified` editor.
-	 */
-	getModifiedEditor(): IEditor;
-}
-
-/**
  * @internal
  */
 export interface ICompositeCodeEditor {
@@ -493,13 +437,6 @@ export interface IDiffEditorContribution {
 	 * Dispose this contribution.
 	 */
 	dispose(): void;
-}
-
-/**
- * @internal
- */
-export function isThemeColor(o: any): o is ThemeColor {
-	return o && typeof o.id === 'string';
 }
 
 /**
@@ -568,7 +505,6 @@ export interface IContentDecorationRenderOptions {
 export interface IDecorationRenderOptions extends IThemeDecorationRenderOptions {
 	isWholeLine?: boolean;
 	rangeBehavior?: TrackedRangeStickiness;
-	overviewRulerLane?: OverviewRulerLane;
 
 	light?: IThemeDecorationRenderOptions;
 	dark?: IThemeDecorationRenderOptions;
@@ -595,6 +531,13 @@ export interface IDecorationInstanceRenderOptions extends IThemeDecorationInstan
  */
 export interface IDecorationOptions {
 	range: IRange;
-	hoverMessage?: IMarkdownString | IMarkdownString[];
+	hoverMessage?: string | string[];
 	renderOptions?: IDecorationInstanceRenderOptions;
 }
+
+/**
+ * The type of the `IEditor`.
+ */
+ export const EditorType = {
+	ICodeEditor: 'vs.editor.ICodeEditor'
+};

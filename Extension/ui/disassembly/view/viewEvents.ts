@@ -10,7 +10,7 @@ import { ConfigurationChangedEvent, EditorOption } from 'vs/editor/common/config
 import { Range } from '../core/range';
 import { Selection } from '../core/selection';
 import { ScrollType } from '../editorCommon';
-import { IModelDecorationsChangedEvent } from 'vs/editor/common/model/textModelEvents';
+import { IModelDecorationsChangedEvent } from '../model/textModelEvents';
 
 export const enum ViewEventType {
 	ViewCompositionStart,
@@ -29,7 +29,6 @@ export const enum ViewEventType {
 	ViewScrollChanged,
 	ViewThemeChanged,
 	ViewTokensChanged,
-	ViewTokensColorsChanged,
 	ViewZonesChanged,
 }
 
@@ -280,15 +279,6 @@ export class ViewTokensChangedEvent {
 	}
 }
 
-export class ViewTokensColorsChangedEvent {
-
-	public readonly type = ViewEventType.ViewTokensColorsChanged;
-
-	constructor() {
-		// Nothing to do
-	}
-}
-
 export class ViewZonesChangedEvent {
 
 	public readonly type = ViewEventType.ViewZonesChanged;
@@ -315,6 +305,5 @@ export type ViewEvent = (
 	| ViewScrollChangedEvent
 	| ViewThemeChangedEvent
 	| ViewTokensChangedEvent
-	| ViewTokensColorsChangedEvent
 	| ViewZonesChangedEvent
 );

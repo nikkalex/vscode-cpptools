@@ -10,11 +10,9 @@ import * as platform from '../../platform';
 import { DynamicViewOverlay } from '../../view/dynamicViewOverlay';
 import { RenderLineNumbersType, EditorOption } from 'vs/editor/common/config/editorOptions';
 import { Position } from '../../core/position';
-import { editorActiveLineNumber, editorLineNumbers } from 'vs/editor/common/view/editorColorRegistry';
 import { RenderingContext } from '../../view/renderingContext';
 import { ViewContext } from '../../view/viewContext';
 import * as viewEvents from '../../view/viewEvents';
-import { registerThemingParticipant } from 'vs/platform/theme/common/themeService';
 
 export class LineNumbersOverlay extends DynamicViewOverlay {
 
@@ -194,16 +192,3 @@ export class LineNumbersOverlay extends DynamicViewOverlay {
 		return this._renderResult[lineIndex];
 	}
 }
-
-// theming
-
-registerThemingParticipant((theme, collector) => {
-	const lineNumbers = theme.getColor(editorLineNumbers);
-	if (lineNumbers) {
-		collector.addRule(`.monaco-editor .line-numbers { color: ${lineNumbers}; }`);
-	}
-	const activeLineNumber = theme.getColor(editorActiveLineNumber);
-	if (activeLineNumber) {
-		collector.addRule(`.monaco-editor .line-numbers.active-line-number { color: ${activeLineNumber}; }`);
-	}
-});

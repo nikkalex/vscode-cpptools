@@ -17,7 +17,6 @@ import { LineDecoration } from '../../viewLayout/lineDecorations';
 import { CharacterMapping, ForeignElementType, RenderLineInput, renderViewLine, LineRange } from '../../viewLayout/viewLineRenderer';
 import { ViewportData } from '../../viewLayout/viewLinesViewportData';
 import { InlineDecorationType } from '../../viewModel/viewModel';
-import { ColorScheme } from 'vs/platform/theme/common/theme';
 import { EditorOption, EditorFontLigatures } from 'vs/editor/common/config/editorOptions';
 
 const canUseFastRenderedViewLine = (function () {
@@ -71,7 +70,6 @@ export class DomReadingContext {
 }
 
 export class ViewLineOptions {
-	public readonly themeType: ColorScheme;
 	public readonly renderWhitespace: 'none' | 'boundary' | 'selection' | 'trailing' | 'all';
 	public readonly renderControlCharacters: boolean;
 	public readonly spaceWidth: number;
@@ -83,8 +81,7 @@ export class ViewLineOptions {
 	public readonly stopRenderingLineAfter: number;
 	public readonly fontLigatures: string;
 
-	constructor(config: IConfiguration, themeType: ColorScheme) {
-		this.themeType = themeType;
+	constructor(config: IConfiguration) {
 		const options = config.options;
 		const fontInfo = options.get(EditorOption.fontInfo);
 		this.renderWhitespace = options.get(EditorOption.renderWhitespace);
@@ -104,8 +101,7 @@ export class ViewLineOptions {
 
 	public equals(other: ViewLineOptions): boolean {
 		return (
-			this.themeType === other.themeType
-			&& this.renderWhitespace === other.renderWhitespace
+			this.renderWhitespace === other.renderWhitespace
 			&& this.renderControlCharacters === other.renderControlCharacters
 			&& this.spaceWidth === other.spaceWidth
 			&& this.middotWidth === other.middotWidth
@@ -152,18 +148,12 @@ export class ViewLine implements IVisibleLine {
 	public onContentChanged(): void {
 		this._isMaybeInvalid = true;
 	}
-	public onTokensChanged(): void {
-		this._isMaybeInvalid = true;
-	}
-	public onDecorationsChanged(): void {
-		this._isMaybeInvalid = true;
-	}
 	public onOptionsChanged(newOptions: ViewLineOptions): void {
 		this._isMaybeInvalid = true;
 		this._options = newOptions;
 	}
 	public onSelectionChanged(): boolean {
-		if (this._options.themeType === ColorScheme.HIGH_CONTRAST || this._options.renderWhitespace === 'selection') {
+		if (this._options.renderWhitespace === 'selection') {
 			this._isMaybeInvalid = true;
 			return true;
 		}
@@ -184,7 +174,7 @@ export class ViewLine implements IVisibleLine {
 
 		// Only send selection information when needed for rendering whitespace
 		let selectionsOnLine: LineRange[] | null = null;
-		if (options.themeType === ColorScheme.HIGH_CONTRAST || this._options.renderWhitespace === 'selection') {
+		if (this._options.renderWhitespace === 'selection') {
 			const selections = viewportData.selections;
 			for (const selection of selections) {
 
@@ -197,7 +187,7 @@ export class ViewLine implements IVisibleLine {
 				const endColumn = (selection.endLineNumber === lineNumber ? selection.endColumn : lineData.maxColumn);
 
 				if (startColumn < endColumn) {
-					if (options.themeType === ColorScheme.HIGH_CONTRAST || this._options.renderWhitespace !== 'selection') {
+					if (this._options.renderWhitespace !== 'selection') {
 						actualInlineDecorations.push(new LineDecoration(startColumn, endColumn, 'inline-selected-text', InlineDecorationType.Regular));
 					} else {
 						if (!selectionsOnLine) {
@@ -218,7 +208,6 @@ export class ViewLine implements IVisibleLine {
 			lineData.isBasicASCII,
 			lineData.containsRTL,
 			lineData.minColumn - 1,
-			lineData.tokens,
 			actualInlineDecorations,
 			lineData.tabSize,
 			lineData.startVisibleColumn,
@@ -251,7 +240,7 @@ export class ViewLine implements IVisibleLine {
 
 		let renderedViewLine: IRenderedViewLine | null = null;
 		if (monospaceAssumptionsAreValid && canUseFastRenderedViewLine && lineData.isBasicASCII && options.useMonospaceOptimizations && output.containsForeignElements === ForeignElementType.None) {
-			if (lineData.content.length < 300 && renderLineInput.lineTokens.getCount() < 100) {
+			if (lineData.content.length < 300) {
 				// Browser rounding errors have been observed in Chrome and IE, so using the fast
 				// view line only for short lines. Please test before removing the length check...
 				// ---

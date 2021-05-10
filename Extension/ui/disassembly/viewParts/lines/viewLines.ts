@@ -8,7 +8,7 @@
 import 'vs/css!./viewLines';
 import * as platform from '../../platform';
 import { FastDomNode } from '../../fastDomNode';
-import { RunOnceScheduler } from 'vs/base/common/async';
+import { RunOnceScheduler } from '../../async';
 import { Configuration } from 'vs/editor/browser/config/configuration';
 import { IVisibleLinesHost, VisibleLinesCollection } from '../../view/viewLayer';
 import { PartFingerprint, PartFingerprints, ViewPart } from '../../view/viewPart';
@@ -134,7 +134,7 @@ export class ViewLines extends ViewPart implements IVisibleLinesHost<ViewLine>, 
 		this._cursorSurroundingLines = options.get(EditorOption.cursorSurroundingLines);
 		this._cursorSurroundingLinesStyle = options.get(EditorOption.cursorSurroundingLinesStyle);
 		this._canUseLayerHinting = !options.get(EditorOption.disableLayerHinting);
-		this._viewLineOptions = new ViewLineOptions(conf, this._context.theme.type);
+		this._viewLineOptions = new ViewLineOptions(conf);
 
 		PartFingerprints.write(this.domNode, PartFingerprint.ViewLines);
 		this.domNode.setClassName(`view-lines ${MOUSE_CURSOR_TEXT_CSS_CLASS_NAME}`);
@@ -204,7 +204,7 @@ export class ViewLines extends ViewPart implements IVisibleLinesHost<ViewLine>, 
 	private _onOptionsMaybeChanged(): boolean {
 		const conf = this._context.configuration;
 
-		const newViewLineOptions = new ViewLineOptions(conf, this._context.theme.type);
+		const newViewLineOptions = new ViewLineOptions(conf);
 		if (!this._viewLineOptions.equals(newViewLineOptions)) {
 			this._viewLineOptions = newViewLineOptions;
 
@@ -227,16 +227,6 @@ export class ViewLines extends ViewPart implements IVisibleLinesHost<ViewLine>, 
 			r = this._visibleLines.getVisibleLine(lineNumber).onSelectionChanged() || r;
 		}
 		return r;
-	}
-	public override onDecorationsChanged(e: viewEvents.ViewDecorationsChangedEvent): boolean {
-		if (true/*e.inlineDecorationsChanged*/) {
-			const rendStartLineNumber = this._visibleLines.getStartLineNumber();
-			const rendEndLineNumber = this._visibleLines.getEndLineNumber();
-			for (let lineNumber = rendStartLineNumber; lineNumber <= rendEndLineNumber; lineNumber++) {
-				this._visibleLines.getVisibleLine(lineNumber).onDecorationsChanged();
-			}
-		}
-		return true;
 	}
 	public override onFlushed(e: viewEvents.ViewFlushedEvent): boolean {
 		const shouldRender = this._visibleLines.onFlushed(e);
@@ -305,9 +295,6 @@ export class ViewLines extends ViewPart implements IVisibleLinesHost<ViewLine>, 
 		return this._visibleLines.onScrollChanged(e) || true;
 	}
 
-	public override onTokensChanged(e: viewEvents.ViewTokensChangedEvent): boolean {
-		return this._visibleLines.onTokensChanged(e);
-	}
 	public override onZonesChanged(e: viewEvents.ViewZonesChangedEvent): boolean {
 		this._context.model.setMaxLineWidth(this._maxLineWidth);
 		return this._visibleLines.onZonesChanged(e);

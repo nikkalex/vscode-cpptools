@@ -5,11 +5,11 @@
 
 // Original file: vscode/src/vs/base/common/resources.ts
 
-import * as extpath from 'vs/base/common/extpath';
-import * as paths from 'vs/base/common/path';
+import * as extpath from './extpath';
+import * as paths from 'path';
 import { URI, uriToFsPath } from './uri';
 import { equalsIgnoreCase, compare as strCompare } from './strings';
-import { Schemas } from 'vs/base/common/network';
+import { Schemas } from './network';
 import { isWindows, isLinux } from './platform';
 import { CharCode } from './charCode';
 

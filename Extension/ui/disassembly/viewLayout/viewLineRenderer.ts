@@ -7,7 +7,6 @@
 
 import { CharCode } from '../charCode';
 import * as strings from '../strings';
-import { IViewLineTokens } from '../core/lineTokens';
 import { IStringBuilder, createStringBuilder } from '../core/stringBuilder';
 import { LineDecoration, LineDecorationsNormalizer } from './lineDecorations';
 import { InlineDecorationType } from '../viewModel/viewModel';
@@ -82,7 +81,6 @@ export class RenderLineInput {
 	public readonly isBasicASCII: boolean;
 	public readonly containsRTL: boolean;
 	public readonly fauxIndentLength: number;
-	public readonly lineTokens: IViewLineTokens;
 	public readonly lineDecorations: LineDecoration[];
 	public readonly tabSize: number;
 	public readonly startVisibleColumn: number;
@@ -108,7 +106,6 @@ export class RenderLineInput {
 		isBasicASCII: boolean,
 		containsRTL: boolean,
 		fauxIndentLength: number,
-		lineTokens: IViewLineTokens,
 		lineDecorations: LineDecoration[],
 		tabSize: number,
 		startVisibleColumn: number,
@@ -128,7 +125,6 @@ export class RenderLineInput {
 		this.isBasicASCII = isBasicASCII;
 		this.containsRTL = containsRTL;
 		this.fauxIndentLength = fauxIndentLength;
-		this.lineTokens = lineTokens;
 		this.lineDecorations = lineDecorations.sort(LineDecoration.compare);
 		this.tabSize = tabSize;
 		this.startVisibleColumn = startVisibleColumn;
@@ -201,7 +197,6 @@ export class RenderLineInput {
 			&& this.renderControlCharacters === other.renderControlCharacters
 			&& this.fontLigatures === other.fontLigatures
 			&& LineDecoration.equalsArr(this.lineDecorations, other.lineDecorations)
-			&& this.lineTokens.equals(other.lineTokens)
 			&& this.sameSelection(other.selectionsOnLine)
 		);
 	}
@@ -449,13 +444,6 @@ function resolveRenderLineInput(input: RenderLineInput): ResolvedRenderLineInput
 	}
 
 	let tokens = transformAndRemoveOverflowing(input.lineTokens, input.fauxIndentLength, len);
-	if (input.renderWhitespace === RenderWhitespace.All ||
-		input.renderWhitespace === RenderWhitespace.Boundary ||
-		(input.renderWhitespace === RenderWhitespace.Selection && !!input.selectionsOnLine) ||
-		input.renderWhitespace === RenderWhitespace.Trailing) {
-
-		tokens = _applyRenderWhitespace(input, lineContent, len, tokens);
-	}
 	let containsForeignElements = ForeignElementType.None;
 	if (input.lineDecorations.length > 0) {
 		for (let i = 0, len = input.lineDecorations.length; i < len; i++) {
@@ -493,35 +481,6 @@ function resolveRenderLineInput(input: RenderLineInput): ResolvedRenderLineInput
 		input.renderWhitespace,
 		input.renderControlCharacters
 	);
-}
-
-/**
- * In the rendering phase, characters are always looped until token.endIndex.
- * Ensure that all tokens end before `len` and the last one ends precisely at `len`.
- */
-function transformAndRemoveOverflowing(tokens: IViewLineTokens, fauxIndentLength: number, len: number): LinePart[] {
-	let result: LinePart[] = [], resultLen = 0;
-
-	// The faux indent part of the line should have no token type
-	if (fauxIndentLength > 0) {
-		result[resultLen++] = new LinePart(fauxIndentLength, '', 0);
-	}
-
-	for (let tokenIndex = 0, tokensLen = tokens.getCount(); tokenIndex < tokensLen; tokenIndex++) {
-		const endIndex = tokens.getEndOffset(tokenIndex);
-		if (endIndex <= fauxIndentLength) {
-			// The faux indent part of the line should have no token type
-			continue;
-		}
-		const type = tokens.getClassName(tokenIndex);
-		if (endIndex >= len) {
-			result[resultLen++] = new LinePart(len, type, 0);
-			break;
-		}
-		result[resultLen++] = new LinePart(endIndex, type, 0);
-	}
-
-	return result;
 }
 
 /**

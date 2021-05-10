@@ -322,11 +322,9 @@ export class CursorStateChangedEvent {
 	public readonly reason: CursorChangeReason;
 	public readonly reachedMaxCursorCount: boolean;
 
-	constructor(oldSelections: Selection[] | null, selections: Selection[], oldModelVersionId: number, modelVersionId: number, source: string, reason: CursorChangeReason, reachedMaxCursorCount: boolean) {
+	constructor(oldSelections: Selection[] | null, selections: Selection[], source: string, reason: CursorChangeReason, reachedMaxCursorCount: boolean) {
 		this.oldSelections = oldSelections;
 		this.selections = selections;
-		this.oldModelVersionId = oldModelVersionId;
-		this.modelVersionId = modelVersionId;
 		this.source = source;
 		this.reason = reason;
 		this.reachedMaxCursorCount = reachedMaxCursorCount;
@@ -364,7 +362,7 @@ export class CursorStateChangedEvent {
 			return this;
 		}
 		return new CursorStateChangedEvent(
-			this.oldSelections, other.selections, this.oldModelVersionId, other.modelVersionId, other.source, other.reason, this.reachedMaxCursorCount || other.reachedMaxCursorCount
+			this.oldSelections, other.selections, other.source, other.reason, this.reachedMaxCursorCount || other.reachedMaxCursorCount
 		);
 	}
 }

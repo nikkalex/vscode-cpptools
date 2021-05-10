@@ -7,7 +7,7 @@
 
 import { isWindows } from './platform';
 import { CharCode } from './charCode';
-import * as paths from 'vs/base/common/path';
+import * as paths from 'path';
 
 const _schemePattern = /^\w[\w\d+.-]*$/;
 const _singleSlashStart = /^\//;

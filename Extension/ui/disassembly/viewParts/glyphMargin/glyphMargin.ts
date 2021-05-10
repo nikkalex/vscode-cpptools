@@ -3,11 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// Original file: vscode/src/vs/editor/browser/viewParts/glyphMargin/glyphMargin.ts
+
 import 'vs/css!./glyphMargin';
-import { DynamicViewOverlay } from 'vs/editor/browser/view/dynamicViewOverlay';
-import { RenderingContext } from 'vs/editor/common/view/renderingContext';
-import { ViewContext } from 'vs/editor/common/view/viewContext';
-import * as viewEvents from 'vs/editor/common/view/viewEvents';
+import { DynamicViewOverlay } from '../../view/dynamicViewOverlay';
+import { RenderingContext } from '../../view/renderingContext';
+import { ViewContext } from '../../view/viewContext';
+import * as viewEvents from '../../view/viewEvents';
 import { EditorOption } from 'vs/editor/common/config/editorOptions';
 
 
